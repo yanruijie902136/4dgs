@@ -6,17 +6,20 @@ import sqlite3
 
 IS_PYTHON3 = sys.version_info[0] >= 3
 
+
 def array_to_blob(array):
     if IS_PYTHON3:
         return array.tostring()
     else:
         return np.getbuffer(array)
 
+
 def blob_to_array(blob, dtype, shape=(-1,)):
     if IS_PYTHON3:
         return np.fromstring(blob, dtype=dtype).reshape(*shape)
     else:
         return np.frombuffer(blob, dtype=dtype).reshape(*shape)
+
 
 class COLMAPDatabase(sqlite3.Connection):
 
@@ -46,8 +49,9 @@ class COLMAPDatabase(sqlite3.Connection):
         params = np.asarray(params, np.float64)
         cursor = self.execute(
             "UPDATE cameras SET model=?, width=?, height=?, params=?, prior_focal_length=True WHERE camera_id=?",
-            (model, width, height, array_to_blob(params),camera_id))
+            (model, width, height, array_to_blob(params), camera_id))
         return cursor.lastrowid
+
 
 def camTodatabase():
     import os
@@ -66,44 +70,46 @@ def camTodatabase():
                     'THIN_PRISM_FISHEYE': 10}
     parser = argparse.ArgumentParser()
     parser.add_argument("--database_path", type=str, default="database.db")
-    parser.add_argument("--txt_path", type=str, default="colmap/sparse_cameras.txt")
+    parser.add_argument("--txt_path", type=str,
+                        default="colmap/sparse_cameras.txt")
     # breakpoint()
     args = parser.parse_args()
-    if os.path.exists(args.database_path)==False:
+    if os.path.exists(args.database_path) == False:
         print("ERROR: database path dosen't exist -- please check database.db.")
         return
     # Open the database.
     db = COLMAPDatabase.connect(args.database_path)
 
-    idList=list()
-    modelList=list()
-    widthList=list()
-    heightList=list()
-    paramsList=list()
+    idList = list()
+    modelList = list()
+    widthList = list()
+    heightList = list()
+    paramsList = list()
     # Update real cameras from .txt
     with open(args.txt_path, "r") as cam:
         lines = cam.readlines()
-        for i in range(0,len(lines),1):
-            if lines[i][0]!='#':
+        for i in range(0, len(lines), 1):
+            if lines[i][0] != '#':
                 strLists = lines[i].split()
-                cameraId=int(strLists[0])
-                cameraModel=camModelDict[strLists[1]] #SelectCameraModel
-                width=int(strLists[2])
-                height=int(strLists[3])
-                paramstr=np.array(strLists[4:12])
+                cameraId = int(strLists[0])
+                cameraModel = camModelDict[strLists[1]]  # SelectCameraModel
+                width = int(strLists[2])
+                height = int(strLists[3])
+                paramstr = np.array(strLists[4:12])
                 params = paramstr.astype(np.float64)
                 idList.append(cameraId)
                 modelList.append(cameraModel)
                 widthList.append(width)
                 heightList.append(height)
                 paramsList.append(params)
-                camera_id = db.update_camera(cameraModel, width, height, params, cameraId)
+                camera_id = db.update_camera(
+                    cameraModel, width, height, params, cameraId)
 
     # Commit the data to the file.
     db.commit()
     # Read and check cameras.
     rows = db.execute("SELECT * FROM cameras")
-    for i in range(0,len(idList),1):
+    for i in range(0, len(idList), 1):
         camera_id, model, width, height, params, prior = next(rows)
         params = blob_to_array(params, np.float64)
         assert camera_id == idList[i]
@@ -113,7 +119,9 @@ def camTodatabase():
     # Close database.db.
     db.close()
 
+
 if __name__ == "__main__":
-    import sys,os
+    import sys
+    import os
 
     camTodatabase()

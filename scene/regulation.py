@@ -9,21 +9,22 @@ import torch.optim.lr_scheduler
 from torch import nn
 
 
-
 def compute_plane_tv(t):
     batch_size, c, h, w = t.shape
     count_h = batch_size * c * (h - 1) * w
     count_w = batch_size * c * h * (w - 1)
     h_tv = torch.square(t[..., 1:, :] - t[..., :h-1, :]).sum()
     w_tv = torch.square(t[..., :, 1:] - t[..., :, :w-1]).sum()
-    return 2 * (h_tv / count_h + w_tv / count_w)  # This is summing over batch and c instead of avg
+    # This is summing over batch and c instead of avg
+    return 2 * (h_tv / count_h + w_tv / count_w)
 
 
 def compute_plane_smoothness(t):
     batch_size, c, h, w = t.shape
     # Convolve with a second derivative filter, in the time dimension which is dimension 2
     first_difference = t[..., 1:, :] - t[..., :h-1, :]  # [batch, c, h-1, w]
-    second_difference = first_difference[..., 1:, :] - first_difference[..., :h-2, :]  # [batch, c, h-2, w]
+    second_difference = first_difference[..., 1:, :] - \
+        first_difference[..., :h-2, :]  # [batch, c, h-2, w]
     # Take the L2 norm of the result
     return torch.square(second_difference).mean()
 
@@ -81,7 +82,8 @@ class PlaneTV(Regularizer):
             if len(grids) == 3:
                 spatial_grids = [0, 1, 2]
             else:
-                spatial_grids = [0, 1, 3]  # These are the spatial grids; the others are spatiotemporal
+                # These are the spatial grids; the others are spatiotemporal
+                spatial_grids = [0, 1, 3]
             for grid_id in spatial_grids:
                 total += compute_plane_tv(grids[grid_id])
             for grid in grids:
@@ -117,7 +119,6 @@ class TimeSmoothness(Regularizer):
             for grid_id in time_grids:
                 total += compute_plane_smoothness(grids[grid_id])
         return torch.as_tensor(total)
-
 
 
 class L1ProposalNetwork(Regularizer):
@@ -173,4 +174,3 @@ class L1TimePlanes(Regularizer):
             for grid_id in spatiotemporal_grids:
                 total += torch.abs(1 - grids[grid_id]).mean()
         return torch.as_tensor(total)
-

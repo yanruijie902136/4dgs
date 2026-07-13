@@ -1,6 +1,8 @@
 import open3d as o3d
 import os
 from tqdm import tqdm
+
+
 def merge_point_clouds(directory, output_file):
     merged_pcd = o3d.geometry.PointCloud()
 
@@ -12,5 +14,6 @@ def merge_point_clouds(directory, output_file):
     merged_pcd = merged_pcd.remove_duplicate_points()
 
     o3d.io.write_point_cloud(output_file, merged_pcd)
+
 
 merge_point_clouds("point_clouds_directory", "merged.ply")

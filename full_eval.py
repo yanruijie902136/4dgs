@@ -3,7 +3,7 @@
 # GRAPHDECO research group, https://team.inria.fr/graphdeco
 # All rights reserved.
 #
-# This software is free for non-commercial, research and evaluation use 
+# This software is free for non-commercial, research and evaluation use
 # under the terms of the LICENSE.md file.
 #
 # For inquiries contact  george.drettakis@inria.fr
@@ -12,7 +12,8 @@
 import os
 from argparse import ArgumentParser
 
-mipnerf360_outdoor_scenes = ["bicycle", "flowers", "garden", "stump", "treehill"]
+mipnerf360_outdoor_scenes = ["bicycle",
+                             "flowers", "garden", "stump", "treehill"]
 mipnerf360_indoor_scenes = ["room", "counter", "kitchen", "bonsai"]
 tanks_and_temples_scenes = ["truck", "train"]
 deep_blending_scenes = ["drjohnson", "playroom"]
@@ -40,16 +41,20 @@ if not args.skip_training:
     common_args = " --quiet --eval --test_iterations -1 "
     for scene in mipnerf360_outdoor_scenes:
         source = args.mipnerf360 + "/" + scene
-        os.system("python train.py -s " + source + " -i images_4 -m " + args.output_path + "/" + scene + common_args)
+        os.system("python train.py -s " + source + " -i images_4 -m " +
+                  args.output_path + "/" + scene + common_args)
     for scene in mipnerf360_indoor_scenes:
         source = args.mipnerf360 + "/" + scene
-        os.system("python train.py -s " + source + " -i images_2 -m " + args.output_path + "/" + scene + common_args)
+        os.system("python train.py -s " + source + " -i images_2 -m " +
+                  args.output_path + "/" + scene + common_args)
     for scene in tanks_and_temples_scenes:
         source = args.tanksandtemples + "/" + scene
-        os.system("python train.py -s " + source + " -m " + args.output_path + "/" + scene + common_args)
+        os.system("python train.py -s " + source + " -m " +
+                  args.output_path + "/" + scene + common_args)
     for scene in deep_blending_scenes:
         source = args.deepblending + "/" + scene
-        os.system("python train.py -s " + source + " -m " + args.output_path + "/" + scene + common_args)
+        os.system("python train.py -s " + source + " -m " +
+                  args.output_path + "/" + scene + common_args)
 
 if not args.skip_rendering:
     all_sources = []
@@ -64,8 +69,10 @@ if not args.skip_rendering:
 
     common_args = " --quiet --eval --skip_train"
     for scene, source in zip(all_scenes, all_sources):
-        os.system("python render.py --iteration 7000 -s " + source + " -m " + args.output_path + "/" + scene + common_args)
-        os.system("python render.py --iteration 30000 -s " + source + " -m " + args.output_path + "/" + scene + common_args)
+        os.system("python render.py --iteration 7000 -s " + source +
+                  " -m " + args.output_path + "/" + scene + common_args)
+        os.system("python render.py --iteration 30000 -s " + source +
+                  " -m " + args.output_path + "/" + scene + common_args)
 
 if not args.skip_metrics:
     scenes_string = ""

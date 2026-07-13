@@ -3,7 +3,7 @@
 # GRAPHDECO research group, https://team.inria.fr/graphdeco
 # All rights reserved.
 #
-# This software is free for non-commercial, research and evaluation use 
+# This software is free for non-commercial, research and evaluation use
 # under the terms of the LICENSE.md file.
 #
 # For inquiries contact  george.drettakis@inria.fr
@@ -13,11 +13,13 @@ from argparse import ArgumentParser, Namespace
 import sys
 import os
 
+
 class GroupParams:
     pass
 
+
 class ParamGroup:
-    def __init__(self, parser: ArgumentParser, name : str, fill_none = False):
+    def __init__(self, parser: ArgumentParser, name: str, fill_none=False):
         group = parser.add_argument_group(name)
         for key, value in vars(self).items():
             shorthand = False
@@ -25,15 +27,18 @@ class ParamGroup:
                 shorthand = True
                 key = key[1:]
             t = type(value)
-            value = value if not fill_none else None 
+            value = value if not fill_none else None
             if shorthand:
                 if t == bool:
-                    group.add_argument("--" + key, ("-" + key[0:1]), default=value, action="store_true")
+                    group.add_argument(
+                        "--" + key, ("-" + key[0:1]), default=value, action="store_true")
                 else:
-                    group.add_argument("--" + key, ("-" + key[0:1]), default=value, type=t)
+                    group.add_argument(
+                        "--" + key, ("-" + key[0:1]), default=value, type=t)
             else:
                 if t == bool:
-                    group.add_argument("--" + key, default=value, action="store_true")
+                    group.add_argument(
+                        "--" + key, default=value, action="store_true")
                 else:
                     group.add_argument("--" + key, default=value, type=t)
 
@@ -44,7 +49,8 @@ class ParamGroup:
                 setattr(group, arg[0], arg[1])
         return group
 
-class ModelParams(ParamGroup): 
+
+class ModelParams(ParamGroup):
     def __init__(self, parser, sentinel=False):
         self.sh_degree = 3
         self._source_path = ""
@@ -54,10 +60,10 @@ class ModelParams(ParamGroup):
         self._white_background = True
         self.data_device = "cuda"
         self.eval = True
-        self.render_process=False
-        self.add_points=False
-        self.extension=".png"
-        self.llffhold=8
+        self.render_process = False
+        self.add_points = False
+        self.extension = ".png"
+        self.llffhold = 8
         super().__init__(parser, "Loading Parameters", sentinel)
 
     def extract(self, args):
@@ -65,52 +71,58 @@ class ModelParams(ParamGroup):
         g.source_path = os.path.abspath(g.source_path)
         return g
 
+
 class PipelineParams(ParamGroup):
     def __init__(self, parser):
         self.convert_SHs_python = False
         self.compute_cov3D_python = False
         self.debug = False
         super().__init__(parser, "Pipeline Parameters")
+
+
 class ModelHiddenParams(ParamGroup):
     def __init__(self, parser):
-        self.net_width = 64 # width of deformation MLP, larger will increase the rendering quality and decrase the training/rendering speed.
-        self.timebase_pe = 4 # useless
-        self.defor_depth = 1 # depth of deformation MLP, larger will increase the rendering quality and decrase the training/rendering speed.
-        self.posebase_pe = 10 # useless
-        self.scale_rotation_pe = 2 # useless
-        self.opacity_pe = 2 # useless
-        self.timenet_width = 64 # useless
-        self.timenet_output = 32 # useless
-        self.bounds = 1.6 
-        self.plane_tv_weight = 0.0001 # TV loss of spatial grid
-        self.time_smoothness_weight = 0.01 # TV loss of temporal grid
+        # width of deformation MLP, larger will increase the rendering quality and decrase the training/rendering speed.
+        self.net_width = 64
+        self.timebase_pe = 4  # useless
+        # depth of deformation MLP, larger will increase the rendering quality and decrase the training/rendering speed.
+        self.defor_depth = 1
+        self.posebase_pe = 10  # useless
+        self.scale_rotation_pe = 2  # useless
+        self.opacity_pe = 2  # useless
+        self.timenet_width = 64  # useless
+        self.timenet_output = 32  # useless
+        self.bounds = 1.6
+        self.plane_tv_weight = 0.0001  # TV loss of spatial grid
+        self.time_smoothness_weight = 0.01  # TV loss of temporal grid
         self.l1_time_planes = 0.0001  # TV loss of temporal grid
         self.kplanes_config = {
-                             'grid_dimensions': 2,
-                             'input_coordinate_dim': 4,
-                             'output_coordinate_dim': 32,
-                             'resolution': [64, 64, 64, 25]  # [64,64,64]: resolution of spatial grid. 25: resolution of temporal grid, better to be half length of dynamic frames
-                            }
-        self.multires = [1, 2, 4, 8] # multi resolution of voxel grid
-        self.no_dx=False # cancel the deformation of Gaussians' position
-        self.no_grid=False # cancel the spatial-temporal hexplane.
-        self.no_ds=False # cancel the deformation of Gaussians' scaling
-        self.no_dr=False # cancel the deformation of Gaussians' rotations
-        self.no_do=True # cancel the deformation of Gaussians' opacity
-        self.no_dshs=True # cancel the deformation of SH colors.
-        self.empty_voxel=False # useless
-        self.grid_pe=0 # useless, I was trying to add positional encoding to hexplane's features
-        self.static_mlp=False # useless
-        self.apply_rotation=False # useless
+            'grid_dimensions': 2,
+            'input_coordinate_dim': 4,
+            'output_coordinate_dim': 32,
+            # [64,64,64]: resolution of spatial grid. 25: resolution of temporal grid, better to be half length of dynamic frames
+            'resolution': [64, 64, 64, 25]
+        }
+        self.multires = [1, 2, 4, 8]  # multi resolution of voxel grid
+        self.no_dx = False  # cancel the deformation of Gaussians' position
+        self.no_grid = False  # cancel the spatial-temporal hexplane.
+        self.no_ds = False  # cancel the deformation of Gaussians' scaling
+        self.no_dr = False  # cancel the deformation of Gaussians' rotations
+        self.no_do = True  # cancel the deformation of Gaussians' opacity
+        self.no_dshs = True  # cancel the deformation of SH colors.
+        self.empty_voxel = False  # useless
+        self.grid_pe = 0  # useless, I was trying to add positional encoding to hexplane's features
+        self.static_mlp = False  # useless
+        self.apply_rotation = False  # useless
 
-        
         super().__init__(parser, "ModelHiddenParams")
-        
+
+
 class OptimizationParams(ParamGroup):
     def __init__(self, parser):
-        self.dataloader=False
-        self.zerostamp_init=False
-        self.custom_sampler=None
+        self.dataloader = False
+        self.zerostamp_init = False
+        self.custom_sampler = None
         self.iterations = 30_000
         self.coarse_iterations = 3000
         self.position_lr_init = 0.00016
@@ -130,7 +142,7 @@ class OptimizationParams(ParamGroup):
         self.percent_dense = 0.01
         self.lambda_dssim = 0
         self.lambda_lpips = 0
-        self.weight_constraint_init= 1
+        self.weight_constraint_init = 1
         self.weight_constraint_after = 0.2
         self.weight_decay_iteration = 5000
         self.opacity_reset_interval = 3000
@@ -145,11 +157,12 @@ class OptimizationParams(ParamGroup):
         self.opacity_threshold_coarse = 0.005
         self.opacity_threshold_fine_init = 0.005
         self.opacity_threshold_fine_after = 0.005
-        self.batch_size=1
-        self.add_point=False
+        self.batch_size = 1
+        self.add_point = False
         super().__init__(parser, "Optimization Parameters")
 
-def get_combined_args(parser : ArgumentParser):
+
+def get_combined_args(parser: ArgumentParser):
     cmdlne_string = sys.argv[1:]
     cfgfile_string = "Namespace()"
     args_cmdline = parser.parse_args(cmdlne_string)
@@ -166,7 +179,7 @@ def get_combined_args(parser : ArgumentParser):
     args_cfgfile = eval(cfgfile_string)
 
     merged_dict = vars(args_cfgfile).copy()
-    for k,v in vars(args_cmdline).items():
+    for k, v in vars(args_cmdline).items():
         if v != None:
             merged_dict[k] = v
     return Namespace(**merged_dict)

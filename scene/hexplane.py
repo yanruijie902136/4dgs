@@ -18,6 +18,8 @@ def get_normalized_directions(directions):
 
 def normalize_aabb(pts, aabb):
     return (pts - aabb[0]) * (2.0 / (aabb[1] - aabb[0])) - 1.0
+
+
 def grid_sample_wrapper(grid: torch.Tensor, coords: torch.Tensor, align_corners: bool = True) -> torch.Tensor:
     grid_dim = coords.shape[-1]
 
@@ -33,7 +35,8 @@ def grid_sample_wrapper(grid: torch.Tensor, coords: torch.Tensor, align_corners:
         raise NotImplementedError(f"Grid-sample was called with {grid_dim}D data but is only "
                                   f"implemented for 2 and 3D data.")
 
-    coords = coords.view([coords.shape[0]] + [1] * (grid_dim - 1) + list(coords.shape[1:]))
+    coords = coords.view([coords.shape[0]] + [1] *
+                         (grid_dim - 1) + list(coords.shape[1:]))
     B, feature_dim = grid.shape[:2]
     n = coords.shape[-2]
     interp = grid_sampler(
@@ -41,9 +44,11 @@ def grid_sample_wrapper(grid: torch.Tensor, coords: torch.Tensor, align_corners:
         coords,  # [B, 1, ..., n, grid_dim]
         align_corners=align_corners,
         mode='bilinear', padding_mode='border')
-    interp = interp.view(B, feature_dim, n).transpose(-1, -2)  # [B, n, feature_dim]
+    # [B, n, feature_dim]
+    interp = interp.view(B, feature_dim, n).transpose(-1, -2)
     interp = interp.squeeze()  # [B?, n, feature_dim?]
     return interp
+
 
 def init_grid_param(
         grid_nd: int,
@@ -52,7 +57,8 @@ def init_grid_param(
         reso: Sequence[int],
         a: float = 0.1,
         b: float = 0.5):
-    assert in_dim == len(reso), "Resolution must have same number of elements as input-dimension"
+    assert in_dim == len(
+        reso), "Resolution must have same number of elements as input-dimension"
     has_time_planes = in_dim == 4
     assert grid_nd <= in_dim
     coo_combs = list(itertools.combinations(range(in_dim), grid_nd))
@@ -87,7 +93,8 @@ def interpolate_ms_features(pts: torch.Tensor,
         interp_space = 1.
         for ci, coo_comb in enumerate(coo_combs):
             # interpolate in plane
-            feature_dim = grid[ci].shape[1]  # shape of grid[ci]: 1, out_dim, *reso
+            # shape of grid[ci]: 1, out_dim, *reso
+            feature_dim = grid[ci].shape[1]
             interp_out_plane = (
                 grid_sample_wrapper(grid[ci], pts[..., coo_comb])
                 .view(-1, feature_dim)
@@ -109,16 +116,16 @@ def interpolate_ms_features(pts: torch.Tensor,
 class HexPlaneField(nn.Module):
     def __init__(
         self,
-        
+
         bounds,
         planeconfig,
         multires
     ) -> None:
         super().__init__()
-        aabb = torch.tensor([[bounds,bounds,bounds],
-                             [-bounds,-bounds,-bounds]])
+        aabb = torch.tensor([[bounds, bounds, bounds],
+                             [-bounds, -bounds, -bounds]])
         self.aabb = nn.Parameter(aabb, requires_grad=False)
-        self.grid_config =  [planeconfig]
+        self.grid_config = [planeconfig]
         self.multiscale_res_multipliers = multires
         self.concat_features = True
 
@@ -145,17 +152,19 @@ class HexPlaneField(nn.Module):
                 self.feat_dim = gp[-1].shape[1]
             self.grids.append(gp)
         # print(f"Initialized model grids: {self.grids}")
-        print("feature_dim:",self.feat_dim)
+        print("feature_dim:", self.feat_dim)
+
     @property
     def get_aabb(self):
         return self.aabb[0], self.aabb[1]
-    def set_aabb(self,xyz_max, xyz_min):
+
+    def set_aabb(self, xyz_max, xyz_min):
         aabb = torch.tensor([
             xyz_max,
             xyz_min
-        ],dtype=torch.float32)
-        self.aabb = nn.Parameter(aabb,requires_grad=False)
-        print("Voxel Plane: set aabb=",self.aabb)
+        ], dtype=torch.float32)
+        self.aabb = nn.Parameter(aabb, requires_grad=False)
+        print("Voxel Plane: set aabb=", self.aabb)
 
     def get_density(self, pts: torch.Tensor, timestamps: Optional[torch.Tensor] = None):
         """Computes and returns the densities."""
@@ -170,7 +179,6 @@ class HexPlaneField(nn.Module):
             concat_features=self.concat_features, num_levels=None)
         if len(features) < 1:
             features = torch.zeros((0, 1)).to(features.device)
-
 
         return features
 
