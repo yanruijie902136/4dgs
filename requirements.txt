@@ -1,5 +1,7 @@
-torch==1.13.1
-torchvision==0.14.1
+--extra-index-url https://download.pytorch.org/whl/cu116
+
+torch==1.13.1+cu116
+torchvision==0.14.1+cu116
 torchaudio==0.13.1
 mmcv==1.6.0
 matplotlib
@@ -9,3 +11,4 @@ plyfile
 pytorch_msssim
 open3d
 imageio[ffmpeg]
+tensorboard
