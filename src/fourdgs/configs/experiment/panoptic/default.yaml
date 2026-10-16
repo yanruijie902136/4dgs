@@ -1,0 +1,12 @@
+# @package _global_
+# The original Panoptic camera adapter fixed the background and SH degree.
+defaults:
+  - /experiment/dynerf/default
+  - _self_
+data:
+  format: panoptic
+  width: 0
+  height: 0
+  white_background: false
+render:
+  max_sh_degree: 0

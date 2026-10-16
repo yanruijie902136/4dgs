@@ -1,0 +1,13 @@
+defaults:
+  - schema
+  - _self_
+  - optional experiment: null
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: ${run.output_dir}/hydra
+  sweep:
+    dir: ${run.output_dir}/sweep
+    subdir: ${hydra.job.num}

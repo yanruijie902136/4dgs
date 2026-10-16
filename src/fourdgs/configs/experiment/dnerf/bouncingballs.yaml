@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+- /experiment/dnerf/dnerf_default
+- _self_
+model:
+  kplanes_config:
+    resolution:
+    - 64
+    - 64
+    - 64
+    - 75

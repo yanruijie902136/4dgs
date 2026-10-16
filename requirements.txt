@@ -1,14 +1,9 @@
---extra-index-url https://download.pytorch.org/whl/cu116
-
-torch==1.13.1+cu116
-torchvision==0.14.1+cu116
-torchaudio==0.13.1
-mmcv==1.6.0
-matplotlib
-argparse
-lpips
-plyfile
-pytorch_msssim
-open3d
-imageio[ffmpeg]
-tensorboard
+--extra-index-url https://download.pytorch.org/whl/cu126
+torch==2.7.1+cu126
+torchvision==0.22.1+cu126
+numpy==1.26.4
+hydra-core==1.3.2
+omegaconf==2.3.0
+plyfile==1.1
+pytorch-msssim==1.0.0
+-e .[preprocess,visualization,dev]

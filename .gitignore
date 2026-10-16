@@ -6,6 +6,14 @@ diff_rasterization/diff_rast.egg-info
 diff_rasterization/dist
 tensorboard_3d
 screenshots
-data/
-data
+/data/
 submodules/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+outputs/
+validation/
+.coverage
+.ipynb_checkpoints/

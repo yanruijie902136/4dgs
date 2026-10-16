@@ -1,0 +1,27 @@
+# @package _global_
+model:
+  net_width: 128
+  defor_depth: 0
+  kplanes_config:
+    output_coordinate_dim: 16
+    resolution:
+    - 64
+    - 64
+    - 64
+    - 150
+  multires:
+  - 1
+  - 2
+  no_do: false
+  no_dshs: false
+data:
+  format: multiview
+  sparse: sparse_
+training:
+  dataloader: true
+  iterations: 15000
+loss:
+  plane_tv_weight: 0.0002
+  time_smoothness_weight: 0.001
+density:
+  densify_until_iter: 10000

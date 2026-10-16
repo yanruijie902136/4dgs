@@ -1,0 +1,6 @@
+# @package _global_
+defaults:
+- /experiment/dynerf/default
+- _self_
+training:
+  batch_size: 2
